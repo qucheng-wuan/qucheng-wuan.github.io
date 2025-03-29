@@ -1,0 +1,202 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Transformer | wuan的小破站</title><meta name="author" content="无暗"><meta name="copyright" content="无暗"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.特点使用&#x3D;&#x3D;注意力&#x3D;&#x3D;来提高这些模型训练速度的模型（最大的好处源于The Transformer如何使自己适合并行化）2.介绍Transformer抛弃了传统的CNN和RNN,整个网络结构完全是由Attention机制组成。 RNN计算限制：1.简介RNN算法只能从左向右依次计算2.问题–时间t依赖t-1时刻的计算结果，这样限制了模型的并行能力；–顺序计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transformer">
+<meta property="og:url" content="http://example.com/2025/03/29/Transformer/index.html">
+<meta property="og:site_name" content="wuan的小破站">
+<meta property="og:description" content="1.特点使用&#x3D;&#x3D;注意力&#x3D;&#x3D;来提高这些模型训练速度的模型（最大的好处源于The Transformer如何使自己适合并行化）2.介绍Transformer抛弃了传统的CNN和RNN,整个网络结构完全是由Attention机制组成。 RNN计算限制：1.简介RNN算法只能从左向右依次计算2.问题–时间t依赖t-1时刻的计算结果，这样限制了模型的并行能力；–顺序计">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/free.png">
+<meta property="article:published_time" content="2025-03-29T01:47:11.000Z">
+<meta property="article:modified_time" content="2025-03-29T01:47:47.289Z">
+<meta property="article:author" content="无暗">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/free.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Transformer",
+  "url": "http://example.com/2025/03/29/Transformer/",
+  "image": "http://example.com/img/free.png",
+  "datePublished": "2025-03-29T01:47:11.000Z",
+  "dateModified": "2025-03-29T01:47:47.289Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "无暗",
+      "url": "http://example.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/desktop.png"><link rel="canonical" href="http://example.com/2025/03/29/Transformer/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Transformer',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/free.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">14</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/free.png" alt="Logo"><span class="site-name">wuan的小破站</span></a><a class="nav-page-title" href="/"><span class="site-name">Transformer</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Transformer</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-03-29T01:47:11.000Z" title="发表于 2025-03-29 09:47:11">2025-03-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-29T01:47:47.289Z" title="更新于 2025-03-29 09:47:47">2025-03-29</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>1.特点<br>使用&#x3D;&#x3D;注意力&#x3D;&#x3D;来提高这些模型训练速度的模型<br>（最大的好处源于The Transformer如何使自己适合并行化）<br>2.介绍<br>Transformer抛弃了传统的CNN和RNN,整个网络结构完全是由<strong>Attention机制</strong>组成。</p>
+<p>RNN计算限制：<br>1.简介<br>RNN算法只能从左向右依次计算<br>2.问题<br>–时间t依赖t-1时刻的计算结果，这样<strong>限制了模型的并行能力；</strong><br>–顺序计算的过程信息会丢失，尽管LSTM(长短时记忆网络)（这是一种改进后的循环神经网络，能够解决RNN无法处理长距离依赖的问题 通过引入三个门（遗忘门、输出门和输出门）来控制信息的流动，从而更好地处理序列中的长期依赖关系 )一定程度上缓解了长期依赖的问题，但是对于长期依赖现象，LSTM依旧无能为力。</p>
+<p>Transformer的好处（也就是解决方法）<br>–使用了attention机制，将序列中任意两个位置的距离缩小为一个常量<br>–不是RNN的顺序结构，因此具有很好的并行性</p>
+<p><em>&#x3D;&#x3D;<em>Transformer结构</em></em>&#x3D;&#x3D;：<br>1.输入–小黑盒–输出</p>
+<p>2.小黑盒：<br><strong>Encoders</strong> + <strong>Decoders</strong><br>Encoder编码组件是一堆编码器（论文上将六个堆在一起–数字6并没有什么神奇之处）。解码组件是一堆相同数量的解码器。</p>
+<p>3.Encoder编码器：<br>self-attention  —-Feed Forward Neural Network(前馈神经网络)<br>过程：<br>self-attention:这层帮助编码器在对特定单词进行<strong>编码</strong>时<strong>查看输入句子中的其他句子</strong>。<br>自注意力层的输出被馈送到Feed Forward Neural Network.(完全相同的前馈网络独立应用于每个位置)</p>
+<p>4.Decoder解码器<br>解码器具有三个层，比encoder编码器多一个Encoder-Decoder Attention，<br>作用是<strong>帮助机器专注于句子输入句子的相关部分</strong></p>
+<p>输入编码的详细过程：<br>1.Embedding嵌入算法将每个输入单词转换为向量<br>（每个单词都嵌入到大小为512的向量中）<br>Embedding嵌入仅发生在最底部的编码器中。<br>所有编码器共有的抽象是它们接受一个大小为512的向量列表–在编码器中，这将是嵌入。<br>（但是在其他编码器中就是输入–直接在下方的编码器中输出）<br>这个列表的大小是我们可以设置的<strong>超参数-</strong>–%% 基本上它是我们训练数据集中最长句子的长度。 %%</p>
+<p>&#x2F;&#x2F;在自注意力层Self-Attention中，这些路径之间存在<strong>依赖</strong>关系。然而，Feed <strong>Forward前馈层没有这些依赖关系</strong>。—因此各种路径可以在流过前馈层的同时并行执行</p>
+<p>Transformer模型<br><a target="_blank" rel="noopener" href="https://colab.research.google.com/github/tensorflow/tensor2tensor/blob/master/tensor2tensor/notebooks/hello_t2t.ipynb#scrollTo=s19ucTii_wYb">Tensor2Tensor 简介 - Colab — Tensor2Tensor Intro - Colab</a></p>
+<p>self-attention具体步骤：<br><strong>question:如何使用向量计算自注意力</strong><br>-1.从每个编码器的输入向量创建三个向量Q，K，V</p>
+<ul>
+<li>(Q是查询向量，K是键向量，V是一个值向量)</li>
+<li>–1.从每个编码器的输入向量创建三个向量Q，K，V（在这种情况下，每个词的嵌入）</li>
+<li>–2.这些向量是通过嵌入乘以我们在训练过程中训练的三个矩阵来创建的</li>
+<li>–3.新向量Q，K，V的维度小于嵌入向量，维度为64,它们不必更小，这是使多头注意力（大部分）的计算保持不变的架构选择。</li>
+<li>（嵌入和编码器输入&#x2F;输出向量维数为512）</li>
+</ul>
+<p>现在可能有一个问题就是你并没有理解查询Q，键K，值V向量<br>&#x3D;&#x3D;其实它们就是计算和思考注意力的抽象概念&#x3D;&#x3D;</p>
+<p>-2.<br>第二步是计算一个分数<br>-3.4.将分数除以8，然后通过softmax操作传递结果<br>（Softmax将分数归一化，因此它们都是正数并且加起来为1）<br>%% Softmax分数：决定了每个单词在这个位置上的表达量。显然，这个位置的单词具有最高的softmax分数，但有时关注与当前单词相关的另一个单词很有用 %%<br>-5.将每个值向量乘以softmax分数<br>（这里的直觉是保持我们想要关注的单词的值不变，并淹没不相关的单词<br>-6.对加权值向量求和。<br>（这会在这个位置产生自注意力层的输出）</p>
+<p><strong>question:自注意力的矩阵计算</strong><br>-1.计算查询Q，键K和值V矩阵<br>（通过将嵌入打包到矩阵X中，并将乘以我们训练的权重矩阵来做到这一点）</p>
+<p>&#x3D;&#x3D;多头注意力机制&#x3D;&#x3D;<br>好处：进一步完善了自注意力层self-attention</p>
+<blockquote>
+<p>[!NOTE]</p>
+</blockquote>
+<blockquote>
+<p>它扩展了<strong>模型关注不同位置的能力</strong>。是的，在上面的示例中，z1 包含一点其他编码，但它可能由实际单词本身主导。如果我们要翻译“The animal didn’t cross the street because it was too tired”这样的句子，那么知道“it”指的是哪个词会很有用。</p>
+<p>它为注意力层<strong>提供了多个“表示子空间</strong>”。正如我们接下来将看到的，使用多头注意力，我们不仅有一个，而且还有多组查询&#x2F;键&#x2F;值权重矩阵（Transformer 使用八个注意力头，所以我们最终每个编码器&#x2F;解码器都有八个集合） . 这些集合中的每一个都是随机初始化的。然后，在训练之后，每个集合用于将输入嵌入（或来自较低编码器&#x2F;解码器的向量）投影到不同的表示子空间中。</p>
+</blockquote>
+<p>解码器堆栈输出一个浮点向量。<br>question:如何变成一个词<br>（这是最后一个线性层的工作，后面一个是softmax层）</p>
+<p>线性层：<br>是一个简单的全连接神经网络，它将解码器堆栈产生的向量投影到一个更大的向量（logits向量）中</p>
+<p>**残差（**The Residuals Network)<br>编码器架构中的一个细节是每个编码器中的每个子层在其周围都有一个残差连接，然后是一个层归一化的步骤</p>
+<p><strong>解码器端</strong>（The Decoder Side)<br>解码器首先处理输入序列。然后将顶部编码器的输出转换成一组注意向量K和V。这些将由每个解码器在其“编码器-解码器”层使用，这有助于解码器将注意力集中在输入序列的适当位置。</p>
+<p>以下步骤重复该过程，直到出现特殊到达符号表示变压器解码器已完成其输出。每一步的输出在下一步被亏送到底部的解码器，解码器就像编码器一样冒泡它们的解码结果。就像我们对编码器输入所做的那样，我们将位置编码嵌入并添加到这些解码器输入中，以指示每个单词的位置。</p>
+<p>解码器中的自注意力层的操作方式与编码器中的方式略有不同：</p>
+<p>在解码器中，自注意力层只允许关注&#x3D;&#x3D;输出序列中较早的位置&#x3D;&#x3D;。这是通过在 self-attention 计算中的 softmax 步骤之前masking屏蔽未来位置（将它们设置为 ）来完成的。</p>
+<p>“Encoder-Decoder Attention”层的工作方式与多头自注意力相似，不同之处在于它从&#x3D;&#x3D;其下方的层创建其查询矩阵&#x3D;&#x3D;，并从编码器堆栈的输出中获取 Keys 和 Values 矩阵。</p>
+<p>中间省略了使用位置编码表示序列的顺序</p>
+<p>本文章参照<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/zgpeace/article/details/126635650">翻译: 详细图解Transformer多头自注意力机制 Attention Is All You Need-CSDN博客</a><br>我希望您发现这是一个有用的地方，可以开始使用 Transformer 的主要概念打破僵局。如果您想更深入，我建议您执行以下步骤：<br>观看原作的视频：<a target="_blank" rel="noopener" href="https://youtu.be/-QH8fRhqFHM">https://youtu.be/-QH8fRhqFHM</a></p>
+<p>阅读Attention Is All You Need论文、Transformer 博客文章（Transformer: A Novel Neural Network Architecture for Language Understanding）和Tensor2Tensor 公告。<br>观看Łukasz Kaiser 的演讲，了解模型及其细节<br>使用作为 Tensor2Tensor 存储库的一部分提供的Jupyter Notebook<br>探索Tensor2Tensor repo。<br>参考<br><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a><br><a target="_blank" rel="noopener" href="https://jalammar.github.io/illustrated-transformer/">https://jalammar.github.io/illustrated-transformer/</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/48508221">https://zhuanlan.zhihu.com/p/48508221</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">无暗</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2025/03/29/Transformer/">http://example.com/2025/03/29/Transformer/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="http://example.com" target="_blank">wuan的小破站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a></div><div class="post-share"><div class="social-share" data-image="/img/free.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/03/21/To%20Future/" title=""><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2"></div></div><div class="info-2"><div class="info-item-1">To...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/02/19/LLM%E6%A8%A1%E5%9E%8B/" title="LLM模型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-02-19</div><div class="info-item-2">LLM模型</div></div><div class="info-2"><div class="info-item-1">LLM大模型1.好用的ai:  2.不同语言模型的Token是不一样的 3.每次答案都不一一样 是因为ai回答具有随机性 你输入文字后他会**“文字接龙”**，选择提示词后面可能出现概率最高的字进行接龙  为什么这个回答有点像掷骰子？因为如果每次都选概率最大的，那么ai会不断重复自己的话语，而随机性就可以让ai较自然的回答 4.语言模型怎么学习文字接龙？ 任何文句都可以是教材！ Eg.“人工智慧真神奇”  语言模型接收到这句话后，通俗来说，就是增强了“人”后面接龙”工”的概率。 5.语言模型的背后实质就是类神经网络，里面有上亿个参数 具体神经网络和参数如何被造出来的—见”李宏毅的机器学习2021“ 6.以前的gpt学习就是通过爬网络上的资料–预训练（自督导式学习）       ...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/free.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">无暗</div><div class="author-info-description">keep learning</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">14</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/29/Transformer/" title="Transformer">Transformer</a><time datetime="2025-03-29T01:47:11.000Z" title="发表于 2025-03-29 09:47:11">2025-03-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/21/To%20Future/" title="无标题">无标题</a><time datetime="2025-03-20T17:32:01.363Z" title="发表于 2025-03-21 01:32:01">2025-03-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/13/%E8%BF%B7%E8%8C%AB%E4%B8%AD/" title="迷茫中">迷茫中</a><time datetime="2025-03-13T06:07:27.000Z" title="发表于 2025-03-13 14:07:27">2025-03-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/13/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/" title="无标题">无标题</a><time datetime="2025-03-13T06:00:41.492Z" title="发表于 2025-03-13 14:00:41">2025-03-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/13/hello-world/" title="Hello World">Hello World</a><time datetime="2025-03-13T06:00:41.487Z" title="发表于 2025-03-13 14:00:41">2025-03-13</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By 无暗</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
